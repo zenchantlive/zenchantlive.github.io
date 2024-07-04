@@ -1,873 +1,1033 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <base href="https://ripples.gl" />
-    <title>ripples.gl - Audio-Reactive Interactive GLSL Shader with Enhanced Sound-Visual Mapping</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-            font-family: Arial, sans-serif;
-        }
-        #canvas {
-            width: 100%;
-            height: 100%;
-            cursor: none;
-        }
-        #hamburger {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background: rgba(0, 0, 0, 0.5);
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-        }
-        #menu {
-            position: fixed;
-            top: 0;
-            right: -400px;
-            width: 400px;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            transition: right 0.3s ease;
-            padding: 20px;
-            box-sizing: border-box;
-            color: white;
-            overflow-y: auto;
-        }
-        #menu.open {
-            right: 0;
-        }
-        .control-group {
-            margin-bottom: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-        }
-        .control-group h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding-bottom: 5px;
-        }
-        .control {
-            margin-bottom: 15px;
-        }
-        .control label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .control input[type="range"] {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            -webkit-appearance: none;
-            appearance: none;
-            height: 5px;
-            border-radius: 5px;
-            outline: none;
-        }
-        .control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            background: white;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .control input[type="color"] {
-            width: 100%;
-            height: 30px;
-            border: none;
-            background: none;
-        }
-        .control button {
-            width: 100%;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border-radius: 5px;
-        }
-        .control button:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-        #audioFile {
-            display: none;
-        }
-        .file-upload {
-            display: inline-block;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #musicControls button {
-            width: auto;
-            margin-right: 5px;
-        }
-        .audio-mapping {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .audio-mapping select {
-            width: 40%;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: none;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        .control-group.keyboard-controls {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        .control-group.keyboard-controls h3 {
-            color: #ffcc00;
-        }
-        .keyboard-info {
-            font-size: 0.9em;
-            margin-top: 10px;
-            color: #aaa;
-        }
-    </style>
-</head>
-<body>
-    <canvas id="canvas"></canvas>
-    <div id="hamburger">☰</div>
-    <div id="menu">
-        <div class="control-group keyboard-controls">
-            <h3>Keyboard Controls</h3>
-            <div class="control">
-                <button id="toggleKeyboardControl">Enable Keyboard Control</button>
-            </div>
-            <div class="keyboard-info">
-                Use arrow keys to move, spacebar to click
-            </div>
+<html><head><base href="https://ripples.gl" /><title>ripples.gl - Audio-Reactive Interactive GLSL Shader with Enhanced Sound-Visual Mapping</title><style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, sans-serif;
+    }
+    #canvas {
+        width: 100%;
+        height: 100%;
+        cursor: none;
+    }
+    #hamburger {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        background: rgba(0, 0, 0, 0.5);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+    }
+    #menu {
+        position: fixed;
+        top: 0;
+        right: -400px;
+        width: 400px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        transition: right 0.3s ease;
+        padding: 20px;
+        box-sizing: border-box;
+        color: white;
+        overflow-y: auto;
+    }
+    #menu.open {
+        right: 0;
+    }
+    .control-group {
+        margin-bottom: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+    }
+    .control-group h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 5px;
+    }
+    .control {
+        margin-bottom: 15px;
+    }
+    .control label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .control input[type="range"] {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        -webkit-appearance: none;
+        height: 5px;
+        border-radius: 5px;
+        outline: none;
+    }
+    .control input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 15px;
+        height: 15px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .control input[type="color"] {
+        width: 100%;
+        height: 30px;
+        border: none;
+        background: none;
+    }
+    .control button {
+        width: 100%;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border-radius: 5px;
+    }
+    .control button:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+    #audioFile {
+        display: none;
+    }
+    .file-upload {
+        display: inline-block;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #musicControls button {
+        width: auto;
+        margin-right: 5px;
+    }
+    .audio-mapping {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .audio-mapping select {
+        width: 40%;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .control-group.keyboard-controls {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .control-group.keyboard-controls h3 {
+        color: #ffcc00;
+    }
+    .keyboard-info {
+        font-size: 0.9em;
+        margin-top: 10px;
+        color: #aaa;
+    }
+    .preset-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .preset-controls input {
+        width: 60%;
+        padding: 5px;
+        border: none;
+        border-radius: 3px;
+    }
+    .preset-controls button {
+        width: 35%;
+        padding: 5px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    #presetList {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+    #presetList li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #presetList li:last-child {
+        border-bottom: none;
+    }
+    #presetList li button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+        margin-left: 5px;
+    }
+    #fullscreenButton {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 100;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        border-radius: 50%;
+        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #fullscreenButton:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+</style></head><body>
+<canvas id="canvas"></canvas>
+<div id="hamburger">☰</div>
+<div id="menu">
+    <div class="control-group">
+        <h3>Presets</h3>
+        <div class="preset-controls">
+            <input type="text" id="presetName" placeholder="Preset name">
+            <button id="savePreset">Save Preset</button>
         </div>
-        <div class="control-group">
-            <h3>Audio Source</h3>
-            <div class="control">
-                <button id="micAudio">Use Microphone</button>
-            </div>
-            <div class="control">
-                <button id="browserAudio">Use Browser Audio</button>
-            </div>
-            <div class="control">
-                <label for="audioFile" class="file-upload">Choose Audio File</label>
-                <input type="file" id="audioFile" accept="audio/*">
-            </div>
+        <ul id="presetList"></ul>
+    </div>
+    <div class="control-group keyboard-controls">
+        <h3>Keyboard Controls</h3>
+        <div class="control">
+            <button id="toggleKeyboardControl">Enable Keyboard Control</button>
         </div>
-        <div class="control-group" id="musicControls" style="display:none;">
-            <h3>Music Controls</h3>
-            <div class="control">
-                <button id="playPauseAudio">Play/Pause</button>
-                <button id="stopAudio">Stop</button>
-                <button id="restartAudio">Restart</button>
-                <button id="rewindAudio">-10s</button>
-                <button id="forwardAudio">+10s</button>
-            </div>
-        </div>
-        <div class="control-group">
-            <h3>Visual Controls</h3>
-            <div class="control">
-                <label for="trippiness">Trippiness</label>
-                <input type="range" id="trippiness" min="0" max="1" step="0.01" value="0.5">
-                <div class="audio-mapping">
-                    <select id="trippinessAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="trippinessAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="hueShift">Hue Shift</label>
-                <input type="range" id="hueShift" min="0" max="1" step="0.01" value="0">
-                <div class="audio-mapping">
-                    <select id="hueShiftAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="hueShiftAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="hueShiftSpeed">Hue Shift Speed</label>
-                <input type="range" id="hueShiftSpeed" min="0" max="1" step="0.01" value="0.1">
-                <div class="audio-mapping">
-                    <select id="hueShiftSpeedAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="hueShiftSpeedAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="psychedelicEffect">Psychedelic Effect</label>
-                <input type="range" id="psychedelicEffect" min="0" max="1" step="0.01" value="0.5">
-                <div class="audio-mapping">
-                    <select id="psychedelicEffectAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="psychedelicEffectAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="colorVariety">Color Variety</label>
-                <input type="range" id="colorVariety" min="0" max="1" step="0.01" value="0.7">
-                <div class="audio-mapping">
-                    <select id="colorVarietyAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="colorVarietyAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="rippleSpeed">Ripple Speed</label>
-                <input type="range" id="rippleSpeed" min="0.1" max="1" step="0.1" value="0.2">
-                <div class="audio-mapping">
-                    <select id="rippleSpeedAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="rippleSpeedAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="rippleSize">Ripple Size</label>
-                <input type="range" id="rippleSize" min="10" max="50" step="1" value="20">
-                <div class="audio-mapping">
-                    <select id="rippleSizeAudioSource">
-                        <option value="none">No Audio Mapping</option>
-                        <option value="bass">Bass</option>
-                        <option value="mid">Mid</option>
-                        <option value="treble">Treble</option>
-                        <option value="volume">Volume</option>
-                    </select>
-                    <input type="range" id="rippleSizeAudioStrength" min="0" max="1" step="0.01" value="0.5">
-                </div>
-            </div>
-            <div class="control">
-                <label for="audioReactivity">Overall Audio Reactivity</label>
-                <input type="range" id="audioReactivity" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="control">
-                <label for="bassReactivity">Bass Reactivity</label>
-                <input type="range" id="bassReactivity" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="control">
-                <label for="midReactivity">Mid Reactivity</label>
-                <input type="range" id="midReactivity" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="control">
-                <label for="trebleReactivity">Treble Reactivity</label>
-                <input type="range" id="trebleReactivity" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="control">
-                <label for="colorShift">Audio Color Shift</label>
-                <input type="range" id="colorShift" min="0" max="1" step="0.1" value="0.5">
-            </div>
-            <div class="control">
-                <label for="baseColor1">Base Color 1</label>
-                <input type="color" id="baseColor1" value="#4287f5">
-            </div>
-            <div class="control">
-                <label for="baseColor2">Base Color 2</label>
-                <input type="color" id="baseColor2" value="#f54242">
-            </div>
-            <div class="control">
-                <label for="baseColor3">Base Color 3</label>
-                <input type="color" id="baseColor3" value="#42f554">
-            </div>
+        <div class="keyboard-info">
+            Use arrow keys to move, spacebar to click
         </div>
     </div>
-    <script id="vertexShader" type="x-shader/x-vertex">
-        attribute vec3 position;
-        void main() {
-            gl_Position = vec4(position, 1.0);
-        }
-    </script>
-    <script id="fragmentShader" type="x-shader/x-fragment">
-        precision highp float;
-        uniform vec2 u_resolution;
-        uniform vec2 u_mouse;
-        uniform float u_time;
-        uniform vec2 u_clicks[10];
-        uniform float u_clickTimes[10];
-        uniform int u_clickCount;
-        uniform float u_audioData[64];
-        uniform float u_rippleSpeed;
-        uniform float u_rippleSize;
-        uniform float u_audioReactivity;
-        uniform float u_bassReactivity;
-        uniform float u_midReactivity;
-        uniform float u_trebleReactivity;
-        uniform float u_colorShift;
-        uniform vec3 u_baseColor1;
-        uniform vec3 u_baseColor2;
-        uniform vec3 u_baseColor3;
-        uniform float u_trippiness;
-        uniform float u_hueShift;
-        uniform float u_hueShiftSpeed;
-        uniform float u_psychedelicEffect;
-        uniform float u_colorVariety;
+    <div class="control-group">
+        <h3>Audio Source</h3>
+        <div class="control">
+            <button id="micAudio">Use Microphone</button>
+        </div>
+        <div class="control">
+            <button id="browserAudio">Use Browser Audio</button>
+        </div>
+        <div class="control">
+            <label for="audioFile" class="file-upload">Choose Audio File</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+    </div>
+    <div class="control-group" id="musicControls" style="display:none;">
+        <h3>Music Controls</h3>
+        <div class="control">
+            <button id="playPauseAudio">Play/Pause</button>
+            <button id="stopAudio">Stop</button>
+            <button id="restartAudio">Restart</button>
+            <button id="rewindAudio">-10s</button>
+            <button id="forwardAudio">+10s</button>
+        </div>
+    </div>
+    <div class="control-group">
+        <h3>Visual Controls</h3>
+        <div class="control">
+            <label for="trippiness">Trippiness</label>
+            <input type="range" id="trippiness" min="0" max="1" step="0.01" value="0.5">
+            <div class="audio-mapping">
+                <select id="trippinessAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="trippinessAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="hueShift">Hue Shift</label>
+            <input type="range" id="hueShift" min="0" max="1" step="0.01" value="0">
+            <div class="audio-mapping">
+                <select id="hueShiftAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="hueShiftAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="hueShiftSpeed">Hue Shift Speed</label>
+            <input type="range" id="hueShiftSpeed" min="0" max="1" step="0.01" value="0.1">
+            <div class="audio-mapping">
+                <select id="hueShiftSpeedAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="hueShiftSpeedAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="psychedelicEffect">Psychedelic Effect</label>
+            <input type="range" id="psychedelicEffect" min="0" max="1" step="0.01" value="0.5">
+            <div class="audio-mapping">
+                <select id="psychedelicEffectAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="psychedelicEffectAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="colorVariety">Color Variety</label>
+            <input type="range" id="colorVariety" min="0" max="1" step="0.01" value="0.7">
+            <div class="audio-mapping">
+                <select id="colorVarietyAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="colorVarietyAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="rippleSpeed">Ripple Speed</label>
+            <input type="range" id="rippleSpeed" min="0.1" max="1" step="0.1" value="0.2">
+            <div class="audio-mapping">
+                <select id="rippleSpeedAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="rippleSpeedAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="rippleSize">Ripple Size</label>
+            <input type="range" id="rippleSize" min="10" max="50" step="1" value="20">
+            <div class="audio-mapping">
+                <select id="rippleSizeAudioSource">
+                    <option value="none">No Audio Mapping</option>
+                    <option value="bass">Bass</option>
+                    <option value="mid">Mid</option>
+                    <option value="treble">Treble</option>
+                    <option value="volume">Volume</option>
+                </select>
+                <input type="range" id="rippleSizeAudioStrength" min="0" max="1" step="0.01" value="0.5">
+            </div>
+        </div>
+        <div class="control">
+            <label for="audioReactivity">Overall Audio Reactivity</label>
+            <input type="range" id="audioReactivity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="control">
+            <label for="bassReactivity">Bass Reactivity</label>
+            <input type="range" id="bassReactivity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="control">
+            <label for="midReactivity">Mid Reactivity</label>
+            <input type="range" id="midReactivity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="control">
+            <label for="trebleReactivity">Treble Reactivity</label>
+            <input type="range" id="trebleReactivity" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="control">
+            <label for="colorShift">Audio Color Shift</label>
+            <input type="range" id="colorShift" min="0" max="1" step="0.1" value="0.5">
+        </div>
+        <div class="control">
+            <label for="baseColor1">Base Color 1</label>
+            <input type="color" id="baseColor1" value="#4287f5">
+        </div>
+        <div class="control">
+            <label for="baseColor2">Base Color 2</label>
+            <input type="color" id="baseColor2" value="#f54242">
+        </div>
+        <div class="control">
+            <label for="baseColor3">Base Color 3</label>
+            <input type="color" id="baseColor3" value="#42f554">
+        </div>
+    </div>
+</div>
+<button id="fullscreenButton">⛶</button>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script id="vertexShader" type="x-shader/x-vertex">
+    attribute vec3 position;
+    void main() {
+        gl_Position = vec4(position, 1.0);
+    }
+</script>
+<script id="fragmentShader" type="x-shader/x-fragment">
+    precision highp float;
+    uniform vec2 u_resolution;
+    uniform vec2 u_mouse;
+    uniform float u_time;
+    uniform vec2 u_clicks[10];
+    uniform float u_clickTimes[10];
+    uniform int u_clickCount;
+    uniform float u_audioData[64];
+    uniform float u_rippleSpeed;
+    uniform float u_rippleSize;
+    uniform float u_audioReactivity;
+    uniform float u_bassReactivity;
+    uniform float u_midReactivity;
+    uniform float u_trebleReactivity;
+    uniform float u_colorShift;
+    uniform vec3 u_baseColor1;
+    uniform vec3 u_baseColor2;
+    uniform vec3 u_baseColor3;
+    uniform float u_trippiness;
+    uniform float u_hueShift;
+    uniform float u_hueShiftSpeed;
+    uniform float u_psychedelicEffect;
+    uniform float u_colorVariety;
 
-        vec3 rgb2hsv(vec3 c) {
-            vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-            vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-            vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-            float d = q.x - min(q.w, q.y);
-            float e = 1.0e-10;
-            return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-        }
+    vec3 rgb2hsv(vec3 c) {
+        vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+        vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+        vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+        float d = q.x - min(q.w, q.y);
+        float e = 1.0e-10;
+        return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+    }
 
-        vec3 hsv2rgb(vec3 c) {
-            vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-            vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-            return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-        }
+    vec3 hsv2rgb(vec3 c) {
+        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
 
-        vec3 palette(float t) {
-            vec3 a = mix(u_baseColor1, u_baseColor2, u_colorVariety);
-            vec3 b = mix(u_baseColor2, u_baseColor3, u_colorVariety);
-            vec3 c = mix(u_baseColor3, u_baseColor1, u_colorVariety);
-            vec3 d = vec3(0.263,0.416,0.557);
+    vec3 palette(float t) {
+        vec3 a = mix(u_baseColor1, u_baseColor2, u_colorVariety);
+        vec3 b = mix(u_baseColor2, u_baseColor3, u_colorVariety);
+        vec3 c = mix(u_baseColor3, u_baseColor1, u_colorVariety);
+        vec3 d = vec3(0.263,0.416,0.557);
+        
+        vec3 col = a + b*cos(6.28318*(c*t+d));
+        
+        // Apply hue shift
+        vec3 hsv = rgb2hsv(col);
+        hsv.x = fract(hsv.x + u_hueShift + u_time * u_hueShiftSpeed);
+        return hsv2rgb(hsv);
+    }
+
+    float ripple(vec2 uv, vec2 center, float time, float audioInfluence) {
+        float d = length(uv - center);
+        float t = clamp(time, 0.0, 5.0);
+        float rippleSpeed = u_rippleSpeed + audioInfluence * u_audioReactivity * 0.1;
+        float rippleRadius = t * rippleSpeed;
+        float wave = sin(max(0.0, d - rippleRadius) * u_rippleSize * (1.0 + audioInfluence * u_audioReactivity * 10.0)) * 0.5 + 0.5;
+        return wave * smoothstep(rippleRadius + 0.1, rippleRadius, d) * smoothstep(5.0, 0.0, t);
+    }
+
+    float getAudioInfluence(vec2 uv) {
+        float bassInfluence = 0.0;
+        float midInfluence = 0.0;
+        float trebleInfluence = 0.0;
+        
+        for(int i = 0; i < 64; i++) {
+            float fi = float(i);
+            float angle = fi * 3.14159 * 2.0 / 64.0;
+            vec2 dir = vec2(cos(angle), sin(angle));
+            float dist = length(uv - dir * 0.5);
+            float value = u_audioData[i] * smoothstep(0.5, 0.0, dist);
             
-            vec3 col = a + b*cos(6.28318*(c*t+d));
-            
-            // Apply hue shift
-            vec3 hsv = rgb2hsv(col);
-            hsv.x = fract(hsv.x + u_hueShift + u_time * u_hueShiftSpeed);
-            return hsv2rgb(hsv);
+            if(i < 21) { // Bass frequencies
+                bassInfluence += value * u_bassReactivity;
+            } else if(i < 42) { // Mid frequencies
+                midInfluence += value * u_midReactivity;
+            } else { // Treble frequencies
+                trebleInfluence += value * u_trebleReactivity;
+            }
         }
+        
+        return (bassInfluence + midInfluence + trebleInfluence) / 64.0;
+    }
 
-        float ripple(vec2 uv, vec2 center, float time, float audioInfluence) {
-            float d = length(uv - center);
-            float t = clamp(time, 0.0, 5.0);
-            float rippleSpeed = u_rippleSpeed + audioInfluence * u_audioReactivity * 0.1;
-            float rippleRadius = t * rippleSpeed;
-            float wave = sin(max(0.0, d - rippleRadius) * u_rippleSize * (1.0 + audioInfluence * u_audioReactivity * 10.0)) * 0.5 + 0.5;
-            return wave * smoothstep(rippleRadius + 0.1, rippleRadius, d) * smoothstep(5.0, 0.0, t);
+    void main() {
+        vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+        vec2 mouse = (u_mouse.xy * 2.0 - u_resolution.xy) / u_resolution.y;
+        
+        float t = u_time * 0.1;
+        
+        vec2 uv0 = uv;
+        vec3 finalColor = vec3(0.0);
+        
+        float audioInfluence = getAudioInfluence(uv) * u_audioReactivity;
+        
+        float mouseDistance = length(uv - mouse);
+        float mouseInfluence = smoothstep(0.5, 0.0, mouseDistance);
+        
+        float totalRippleEffect = 0.0;
+        for (int i = 0; i < 10; i++) {
+            if (i >= u_clickCount) break;
+            vec2 click = (u_clicks[i].xy * 2.0 - u_resolution.xy) / u_resolution.y;
+            float timeSinceClick = u_time - u_clickTimes[i];
+            totalRippleEffect += ripple(uv, click, timeSinceClick, audioInfluence);
         }
-
-        float getAudioInfluence(vec2 uv) {
-            float bassInfluence = 0.0;
-            float midInfluence = 0.0;
-            float trebleInfluence = 0.0;
+        
+        float iterations = 4.0 + u_trippiness * 4.0;
+        for (float i = 0.0; i < 8.0; i++) {
+            if (i >= iterations) break;
+            uv = fract(uv * (1.5 + u_trippiness * 0.5)) - 0.5;
             
-            for(int i = 0; i < 64; i++) {
-                float fi = float(i);
-                float angle = fi * 3.14159 * 2.0 / 64.0;
-                vec2 dir = vec2(cos(angle), sin(angle));
-                float dist = length(uv - dir * 0.5);
-                float value = u_audioData[i] * smoothstep(0.5, 0.0, dist);
-                
-                if(i < 21) { // Bass frequencies
-                    bassInfluence += value * u_bassReactivity;
-                } else if(i < 42) { // Mid frequencies
-                    midInfluence += value * u_midReactivity;
-                } else { // Treble frequencies
-                    trebleInfluence += value * u_trebleReactivity;
+            float d = length(uv) * exp(-length(uv0));
+            
+            vec3 col = palette(length(uv0) + i*.4 + t + audioInfluence * u_colorShift);
+            
+            float swirl = sin(d*(8. + u_trippiness * 4.) + t + mouseInfluence * 5.0 + totalRippleEffect * 5.0 + audioInfluence * 10.0) 
+                        / (8.0 + mouseInfluence * 4.0 + audioInfluence * 2.0);
+            d = mix(d, swirl, u_trippiness);
+            d = abs(d);
+            
+            d = pow(0.01 / d, 1.2 + audioInfluence + u_trippiness);
+            
+            finalColor += col * d;
+        }
+        
+        finalColor += vec3(1.0, 0.8, 0.6) * smoothstep(0.2, 0.0, mouseDistance) * 0.5;
+        finalColor += mix(u_baseColor2, u_baseColor3, sin(u_time) * 0.5 + 0.5) * totalRippleEffect * 0.5;
+        finalColor += mix(u_baseColor1, u_baseColor3, cos(u_time) * 0.5 + 0.5) * audioInfluence;
+        
+        finalColor *= 1.0 + u_trippiness * 0.5;
+        
+        // Apply psychedelic effect
+        vec3 psychColor = hsv2rgb(vec3(fract(u_time * 0.1), 1.0, 1.0));
+        finalColor = mix(finalColor, psychColor * length(finalColor), u_psychedelicEffect * (sin(u_time * 2.0) * 0.5 + 0.5));
+        
+        gl_FragColor = vec4(finalColor, 1.0);
+    }
+</script>
+<script>
+    const canvas = document.getElementById('canvas');
+    const gl = canvas.getContext('webgl');
+
+    if (!gl) {
+        alert('WebGL not supported');
+    }
+
+    const program = gl.createProgram();
+
+    function createShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+
+    const vertexShader = createShader(gl.VERTEX_SHADER, document.getElementById('vertexShader').textContent);
+    const fragmentShader = createShader(gl.FRAGMENT_SHADER, document.getElementById('fragmentShader').textContent);
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error('Program link error:', gl.getProgramInfoLog(program));
+    }
+
+    gl.useProgram(program);
+
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    const positionLocation = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    const uniforms = {
+        time: gl.getUniformLocation(program, 'u_time'),
+        resolution: gl.getUniformLocation(program, 'u_resolution'),
+        mouse: gl.getUniformLocation(program, 'u_mouse'),
+        clicks: gl.getUniformLocation(program, 'u_clicks'),
+        clickTimes: gl.getUniformLocation(program, 'u_clickTimes'),
+        clickCount: gl.getUniformLocation(program, 'u_clickCount'),
+        audioData: gl.getUniformLocation(program, 'u_audioData'),
+        rippleSpeed: gl.getUniformLocation(program, 'u_rippleSpeed'),
+        rippleSize: gl.getUniformLocation(program, 'u_rippleSize'),
+        audioReactivity: gl.getUniformLocation(program, 'u_audioReactivity'),
+        bassReactivity: gl.getUniformLocation(program, 'u_bassReactivity'),
+        midReactivity: gl.getUniformLocation(program, 'u_midReactivity'),
+        trebleReactivity: gl.getUniformLocation(program, 'u_trebleReactivity'),
+        colorShift: gl.getUniformLocation(program, 'u_colorShift'),
+        baseColor1: gl.getUniformLocation(program, 'u_baseColor1'),
+        baseColor2: gl.getUniformLocation(program, 'u_baseColor2'),
+        baseColor3: gl.getUniformLocation(program, 'u_baseColor3'),
+        trippiness: gl.getUniformLocation(program, 'u_trippiness'),
+        hueShift: gl.getUniformLocation(program, 'u_hueShift'),
+        hueShiftSpeed: gl.getUniformLocation(program, 'u_hueShiftSpeed'),
+        psychedelicEffect: gl.getUniformLocation(program, 'u_psychedelicEffect'),
+        colorVariety: gl.getUniformLocation(program, 'u_colorVariety')
+    };
+
+    let mouseX = 0, mouseY = 0;
+    let clicks = [];
+    let clickTimes = [];
+
+    canvas.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = canvas.height - e.clientY;
+    });
+
+    canvas.addEventListener('click', (e) => {
+        clicks.push([e.clientX, canvas.height - e.clientY]);
+        clickTimes.push(performance.now() * 0.001);
+        if (clicks.length > 10) {
+            clicks.shift();
+            clickTimes.shift();
+        }
+    });
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Audio setup
+    let audioContext, analyser, dataArray, currentAudioSource, audioElement;
+    const micAudioButton = document.getElementById('micAudio');
+    const browserAudioButton = document.getElementById('browserAudio');
+    const audioFileInput = document.getElementById('audioFile');
+    const musicControls = document.getElementById('musicControls');
+    const playPauseButton = document.getElementById('playPauseAudio');
+    const stopButton = document.getElementById('stopAudio');
+    const restartButton = document.getElementById('restartAudio');
+    const rewindButton = document.getElementById('rewindAudio');
+    const forwardButton = document.getElementById('forwardAudio');
+
+    micAudioButton.addEventListener('click', initMicAudio);
+    browserAudioButton.addEventListener('click', initBrowserAudio);
+    audioFileInput.addEventListener('change', handleFileSelect);
+    playPauseButton.addEventListener('click', toggleAudio);
+    stopButton.addEventListener('click', stopAudio);
+    restartButton.addEventListener('click', restartAudio);
+    rewindButton.addEventListener('click', () => seekAudio(-10));
+    forwardButton.addEventListener('click', () => seekAudio(10));
+
+    function initAudioContext() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 128;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+        }
+    }
+
+    function initMicAudio() {
+        initAudioContext();
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+            .then(stream => {
+                if (currentAudioSource) {
+                    currentAudioSource.disconnect();
                 }
-            }
-            
-            return (bassInfluence + midInfluence + trebleInfluence) / 64.0;
-        }
+                currentAudioSource = audioContext.createMediaStreamSource(stream);
+                currentAudioSource.connect(analyser);
+                micAudioButton.textContent = 'Microphone Active';
+                browserAudioButton.textContent = 'Use Browser Audio';
+                musicControls.style.display = 'none';
+            })
+            .catch(err => {
+                console.error('Error accessing microphone:', err);
+            });
+    }
 
-        void main() {
-            vec2 uv = (gl_FragCoord.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-            vec2 mouse = (u_mouse.xy * 2.0 - u_resolution.xy) / u_resolution.y;
-            
-            float t = u_time * 0.1;
-            
-            vec2 uv0 = uv;
-            vec3 finalColor = vec3(0.0);
-            
-            float audioInfluence = getAudioInfluence(uv) * u_audioReactivity;
-            
-            float mouseDistance = length(uv - mouse);
-            float mouseInfluence = smoothstep(0.5, 0.0, mouseDistance);
-            
-            float totalRippleEffect = 0.0;
-            for (int i = 0; i < 10; i++) {
-                if (i >= u_clickCount) break;
-                vec2 click = (u_clicks[i].xy * 2.0 - u_resolution.xy) / u_resolution.y;
-                float timeSinceClick = u_time - u_clickTimes[i];
-                totalRippleEffect += ripple(uv, click, timeSinceClick, audioInfluence);
-            }
-            
-            float iterations = 4.0 + u_trippiness * 4.0;
-            for (float i = 0.0; i < 8.0; i++) {
-                if (i >= iterations) break;
-                uv = fract(uv * (1.5 + u_trippiness * 0.5)) - 0.5;
-                
-                float d = length(uv) * exp(-length(uv0));
-                
-                vec3 col = palette(length(uv0) + i*.4 + t + audioInfluence * u_colorShift);
-                
-                float swirl = sin(d*(8. + u_trippiness * 4.) + t + mouseInfluence * 5.0 + totalRippleEffect * 5.0 + audioInfluence * 10.0) 
-                            / (8.0 + mouseInfluence * 4.0 + audioInfluence * 2.0);
-                d = mix(d, swirl, u_trippiness);
-                d = abs(d);
-                
-                d = pow(0.01 / d, 1.2 + audioInfluence + u_trippiness);
-                
-                finalColor += col * d;
-            }
-            
-            finalColor += vec3(1.0, 0.8, 0.6) * smoothstep(0.2, 0.0, mouseDistance) * 0.5;
-            finalColor += mix(u_baseColor2, u_baseColor3, sin(u_time) * 0.5 + 0.5) * totalRippleEffect * 0.5;
-            finalColor += mix(u_baseColor1, u_baseColor3, cos(u_time) * 0.5 + 0.5) * audioInfluence;
-            
-            finalColor *= 1.0 + u_trippiness * 0.5;
-            
-            // Apply psychedelic effect
-            vec3 psychColor = hsv2rgb(vec3(fract(u_time * 0.1), 1.0, 1.0));
-            finalColor = mix(finalColor, psychColor * length(finalColor), u_psychedelicEffect * (sin(u_time * 2.0) * 0.5 + 0.5));
-            
-            gl_FragColor = vec4(finalColor, 1.0);
-        }
-    </script>
-    <script>
-        const canvas = document.getElementById('canvas');
-        const gl = canvas.getContext('webgl');
-
-        if (!gl) {
-            alert('WebGL not supported');
-        }
-
-        const program = gl.createProgram();
-
-        function createShader(type, source) {
-            const shader = gl.createShader(type);
-            gl.shaderSource(shader, source);
-            gl.compileShader(shader);
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-                gl.deleteShader(shader);
-                return null;
-            }
-            return shader;
-        }
-
-        const vertexShader = createShader(gl.VERTEX_SHADER, document.getElementById('vertexShader').textContent);
-        const fragmentShader = createShader(gl.FRAGMENT_SHADER, document.getElementById('fragmentShader').textContent);
-
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error('Program link error:', gl.getProgramInfoLog(program));
-        }
-
-        gl.useProgram(program);
-
-        const positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
-        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-        const positionLocation = gl.getAttribLocation(program, 'position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-        const uniforms = {
-            time: gl.getUniformLocation(program, 'u_time'),
-            resolution: gl.getUniformLocation(program, 'u_resolution'),
-            mouse: gl.getUniformLocation(program, 'u_mouse'),
-            clicks: gl.getUniformLocation(program, 'u_clicks'),
-            clickTimes: gl.getUniformLocation(program, 'u_clickTimes'),
-            clickCount: gl.getUniformLocation(program, 'u_clickCount'),
-            audioData: gl.getUniformLocation(program, 'u_audioData'),
-            rippleSpeed: gl.getUniformLocation(program, 'u_rippleSpeed'),
-            rippleSize: gl.getUniformLocation(program, 'u_rippleSize'),
-            audioReactivity: gl.getUniformLocation(program, 'u_audioReactivity'),
-            bassReactivity: gl.getUniformLocation(program, 'u_bassReactivity'),
-            midReactivity: gl.getUniformLocation(program, 'u_midReactivity'),
-            trebleReactivity: gl.getUniformLocation(program, 'u_trebleReactivity'),
-            colorShift: gl.getUniformLocation(program, 'u_colorShift'),
-            baseColor1: gl.getUniformLocation(program, 'u_baseColor1'),
-            baseColor2: gl.getUniformLocation(program, 'u_baseColor2'),
-            baseColor3: gl.getUniformLocation(program, 'u_baseColor3'),
-            trippiness: gl.getUniformLocation(program, 'u_trippiness'),
-            hueShift: gl.getUniformLocation(program, 'u_hueShift'),
-            hueShiftSpeed: gl.getUniformLocation(program, 'u_hueShiftSpeed'),
-            psychedelicEffect: gl.getUniformLocation(program, 'u_psychedelicEffect'),
-            colorVariety: gl.getUniformLocation(program, 'u_colorVariety')
-        };
-
-        let mouseX = 0, mouseY = 0;
-        let clicks = [];
-        let clickTimes = [];
-
-        canvas.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = canvas.height - e.clientY;
-        });
-
-        canvas.addEventListener('click', (e) => {
-            clicks.push([e.clientX, canvas.height - e.clientY]);
-            clickTimes.push(performance.now() * 0.001);
-            if (clicks.length > 10) {
-                clicks.shift();
-                clickTimes.shift();
-            }
-        });
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            gl.viewport(0, 0, canvas.width, canvas.height);
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        // Audio setup
-        let audioContext, analyser, dataArray, currentAudioSource, audioElement;
-        const micAudioButton = document.getElementById('micAudio');
-        const browserAudioButton = document.getElementById('browserAudio');
-        const audioFileInput = document.getElementById('audioFile');
-        const musicControls = document.getElementById('musicControls');
-        const playPauseButton = document.getElementById('playPauseAudio');
-        const stopButton = document.getElementById('stopAudio');
-        const restartButton = document.getElementById('restartAudio');
-        const rewindButton = document.getElementById('rewindAudio');
-        const forwardButton = document.getElementById('forwardAudio');
-
-        micAudioButton.addEventListener('click', initMicAudio);
-        browserAudioButton.addEventListener('click', initBrowserAudio);
-        audioFileInput.addEventListener('change', handleFileSelect);
-        playPauseButton.addEventListener('click', toggleAudio);
-        stopButton.addEventListener('click', stopAudio);
-        restartButton.addEventListener('click', restartAudio);
-        rewindButton.addEventListener('click', () => seekAudio(-10));
-        forwardButton.addEventListener('click', () => seekAudio(10));
-
-        function initAudioContext() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 128;
-                dataArray = new Uint8Array(analyser.frequencyBinCount);
-            }
-        }
-
-        function initMicAudio() {
-            initAudioContext();
-            navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    function initBrowserAudio() {
+        initAudioContext();
+        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
                 .then(stream => {
                     if (currentAudioSource) {
                         currentAudioSource.disconnect();
                     }
                     currentAudioSource = audioContext.createMediaStreamSource(stream);
                     currentAudioSource.connect(analyser);
-                    micAudioButton.textContent = 'Microphone Active';
-                    browserAudioButton.textContent = 'Use Browser Audio';
+                    browserAudioButton.textContent = 'Browser Audio Active';
+                    micAudioButton.textContent = 'Use Microphone';
                     musicControls.style.display = 'none';
                 })
                 .catch(err => {
-                    console.error('Error accessing microphone:', err);
+                    console.error('Error accessing browser audio:', err);
+                    alert('Unable to access browser audio. Please ensure you have granted the necessary permissions.');
                 });
+        } else {
+            alert('Your browser does not support capturing system audio.');
         }
+    }
 
-        function initBrowserAudio() {
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
             initAudioContext();
-            if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-                navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
-                    .then(stream => {
-                        if (currentAudioSource) {
-                            currentAudioSource.disconnect();
-                        }
-                        currentAudioSource = audioContext.createMediaStreamSource(stream);
-                        currentAudioSource.connect(analyser);
-                        browserAudioButton.textContent = 'Browser Audio Active';
-                        micAudioButton.textContent = 'Use Microphone';
-                        musicControls.style.display = 'none';
-                    })
-                    .catch(err => {
-                        console.error('Error accessing browser audio:', err);
-                        alert('Unable to access browser audio. Please ensure you have granted the necessary permissions.');
-                    });
-            } else {
-                alert('Your browser does not support capturing system audio.');
-            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                audioContext.decodeAudioData(arrayBuffer, (buffer) => {
+                    if (currentAudioSource) {
+                        currentAudioSource.disconnect();
+                    }
+                    audioElement = new Audio();
+                    audioElement.src = URL.createObjectURL(file);
+                    currentAudioSource = audioContext.createMediaElementSource(audioElement);
+                    currentAudioSource.connect(analyser);
+                    currentAudioSource.connect(audioContext.destination);
+                    micAudioButton.textContent = 'Use Microphone';
+                    browserAudioButton.textContent = 'Use Browser Audio';
+                    musicControls.style.display = 'block';
+                    playPauseButton.textContent = 'Play';
+                });
+            };
+            reader.readAsArrayBuffer(file);
         }
+    }
 
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                initAudioContext();
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const arrayBuffer = e.target.result;
-                    audioContext.decodeAudioData(arrayBuffer, (buffer) => {
-                        if (currentAudioSource) {
-                            currentAudioSource.disconnect();
-                        }
-                        audioElement = new Audio();
-                        audioElement.src = URL.createObjectURL(file);
-                        currentAudioSource = audioContext.createMediaElementSource(audioElement);
-                        currentAudioSource.connect(analyser);
-                        currentAudioSource.connect(audioContext.destination);
-                        micAudioButton.textContent = 'Use Microphone';
-                        browserAudioButton.textContent = 'Use Browser Audio';
-                        musicControls.style.display = 'block';
-                        playPauseButton.textContent = 'Play';
-                    });
-                };
-                reader.readAsArrayBuffer(file);
-            }
-        }
+    let isPlaying = false;
 
-        let isPlaying = false;
-
-        function toggleAudio() {
-            if (isPlaying) {
-                audioElement.pause();
-                playPauseButton.textContent = 'Play';
-            } else {
-                audioElement.play();
-                playPauseButton.textContent = 'Pause';
-            }
-            isPlaying = !isPlaying;
-        }
-
-        function stopAudio() {
+    function toggleAudio() {
+        if (isPlaying) {
             audioElement.pause();
-            audioElement.currentTime = 0;
             playPauseButton.textContent = 'Play';
-            isPlaying = false;
+        } else {
+            audioElement.play();
+            playPauseButton.textContent = 'Pause';
         }
+        isPlaying = !isPlaying;
+    }
 
-        function restartAudio() {
-            audioElement.currentTime = 0;
-            if (!isPlaying) {
-                audioElement.play();
-                playPauseButton.textContent = 'Pause';
-                isPlaying = true;
+    function stopAudio() {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        playPauseButton.textContent = 'Play';
+        isPlaying = false;
+    }
+
+    function restartAudio() {
+        audioElement.currentTime = 0;
+        if (!isPlaying) {
+            audioElement.play();
+            playPauseButton.textContent = 'Pause';
+            isPlaying = true;
+        }
+    }
+
+    function seekAudio(seconds) {
+        audioElement.currentTime += seconds;
+    }
+
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const menu = document.getElementById('menu');
+    hamburger.addEventListener('click', () => {
+        menu.classList.toggle('open');
+    });
+
+    // Control parameters
+    const controls = {
+        trippiness: document.getElementById('trippiness'),
+        hueShift: document.getElementById('hueShift'),
+        hueShiftSpeed: document.getElementById('hueShiftSpeed'),
+        psychedelicEffect: document.getElementById('psychedelicEffect'),
+        colorVariety: document.getElementById('colorVariety'),
+        rippleSpeed: document.getElementById('rippleSpeed'),
+        rippleSize: document.getElementById('rippleSize'),
+        audioReactivity: document.getElementById('audioReactivity'),
+        bassReactivity: document.getElementById('bassReactivity'),
+        midReactivity: document.getElementById('midReactivity'),
+        trebleReactivity: document.getElementById('trebleReactivity'),
+        colorShift: document.getElementById('colorShift'),
+        baseColor1: document.getElementById('baseColor1'),
+        baseColor2: document.getElementById('baseColor2'),
+        baseColor3: document.getElementById('baseColor3')
+    };
+
+    const audioMappings = {
+        trippiness: {
+            source: document.getElementById('trippinessAudioSource'),
+            strength: document.getElementById('trippinessAudioStrength')
+        },
+        hueShift: {
+            source: document.getElementById('hueShiftAudioSource'),
+            strength: document.getElementById('hueShiftAudioStrength')
+        },
+        hueShiftSpeed: {
+            source: document.getElementById('hueShiftSpeedAudioSource'),
+            strength: document.getElementById('hueShiftSpeedAudioStrength')
+        },
+        psychedelicEffect: {
+            source: document.getElementById('psychedelicEffectAudioSource'),
+            strength: document.getElementById('psychedelicEffectAudioStrength')
+        },
+        colorVariety: {
+            source: document.getElementById('colorVarietyAudioSource'),
+            strength: document.getElementById('colorVarietyAudioStrength')
+        },
+        rippleSpeed: {
+            source: document.getElementById('rippleSpeedAudioSource'),
+            strength: document.getElementById('rippleSpeedAudioStrength')
+        },
+        rippleSize: {
+            source: document.getElementById('rippleSizeAudioSource'),
+            strength: document.getElementById('rippleSizeAudioStrength')
+        }
+    };
+
+    function hexToRGB(hex) {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        return [r, g, b];
+    }
+
+    function getAudioValue(source) {
+        if (!dataArray) return 0;
+        switch(source) {
+            case 'bass':
+                return dataArray.slice(0, 21).reduce((a, b) => a + b, 0) / (21 * 255);
+            case 'mid':
+                return dataArray.slice(21, 42).reduce((a, b) => a + b, 0) / (21 * 255);
+            case 'treble':
+                return dataArray.slice(42).reduce((a, b) => a + b, 0) / (22 * 255);
+            case 'volume':
+                return dataArray.reduce((a, b) => a + b, 0) / (64 * 255);
+            default:
+                return 0;
+        }
+    }
+
+    function updateUniforms() {
+        for (const [key, control] of Object.entries(controls)) {
+            let value = parseFloat(control.value);
+            if (audioMappings[key]) {
+                const audioSource = audioMappings[key].source.value;
+                const audioStrength = parseFloat(audioMappings[key].strength.value);
+                if (audioSource !== 'none') {
+                    const audioValue = getAudioValue(audioSource);
+                    value += audioValue * audioStrength * (control.max - control.min);
+                    value = Math.max(control.min, Math.min(control.max, value));
+                }
+            }
+            if (key.startsWith('baseColor')) {
+                gl.uniform3fv(uniforms[key], hexToRGB(control.value));
+            } else {
+                gl.uniform1f(uniforms[key], value);
             }
         }
+    }
 
-        function seekAudio(seconds) {
-            audioElement.currentTime += seconds;
+    Object.values(controls).forEach(control => {
+        control.addEventListener('input', updateUniforms);
+    });
+
+    Object.values(audioMappings).forEach(mapping => {
+        mapping.source.addEventListener('change', updateUniforms);
+        mapping.strength.addEventListener('input', updateUniforms);
+    });
+
+    // Keyboard control
+    let keyboardControlEnabled = false;
+    const toggleKeyboardControlButton = document.getElementById('toggleKeyboardControl');
+    toggleKeyboardControlButton.addEventListener('click', () => {
+        keyboardControlEnabled = !keyboardControlEnabled;
+        toggleKeyboardControlButton.textContent = keyboardControlEnabled ? 'Disable Keyboard Control' : 'Enable Keyboard Control';
+    });
+
+    let keyboardX = 0, keyboardY = 0;
+    const keyboardSpeed = 5;
+
+    document.addEventListener('keydown', (e) => {
+        if (!keyboardControlEnabled) return;
+        switch (e.key) {
+            case 'ArrowUp':
+                keyboardY += keyboardSpeed;
+                break;
+            case 'ArrowDown':
+                keyboardY -= keyboardSpeed;
+                break;
+            case 'ArrowLeft':
+                keyboardX -= keyboardSpeed;
+                break;
+            case 'ArrowRight':
+                keyboardX += keyboardSpeed;
+                break;
+            case ' ':
+                clicks.push([keyboardX + canvas.width / 2, canvas.height - (keyboardY + canvas.height / 2)]);
+                clickTimes.push(performance.now() * 0.001);
+                if (clicks.length > 10) {
+                    clicks.shift();
+                    clickTimes.shift();
+                }
+                break;
         }
+    });
 
-        // Hamburger menu
-        const hamburger = document.getElementById('hamburger');
-        const menu = document.getElementById('menu');
-        hamburger.addEventListener('click', () => {
-            menu.classList.toggle('open');
-        });
+    // GUN setup
+    const gun = Gun();
+    const presets = gun.get('ripples-gl-presets');
 
-        // Control parameters
-        const controls = {
-            trippiness: document.getElementById('trippiness'),
-            hueShift: document.getElementById('hueShift'),
-            hueShiftSpeed: document.getElementById('hueShiftSpeed'),
-            psychedelicEffect: document.getElementById('psychedelicEffect'),
-            colorVariety: document.getElementById('colorVariety'),
-            rippleSpeed: document.getElementById('rippleSpeed'),
-            rippleSize: document.getElementById('rippleSize'),
-            audioReactivity: document.getElementById('audioReactivity'),
-            bassReactivity: document.getElementById('bassReactivity'),
-            midReactivity: document.getElementById('midReactivity'),
-            trebleReactivity: document.getElementById('trebleReactivity'),
-            colorShift: document.getElementById('colorShift'),
-            baseColor1: document.getElementById('baseColor1'),
-            baseColor2: document.getElementById('baseColor2'),
-            baseColor3: document.getElementById('baseColor3')
-        };
+    const savePresetButton = document.getElementById('savePreset');
+    const presetNameInput = document.getElementById('presetName');
+    const presetList = document.getElementById('presetList');
 
-        const audioMappings = {
-            trippiness: {
-                source: document.getElementById('trippinessAudioSource'),
-                strength: document.getElementById('trippinessAudioStrength')
-            },
-            hueShift: {
-                source: document.getElementById('hueShiftAudioSource'),
-                strength: document.getElementById('hueShiftAudioStrength')
-            },
-            hueShiftSpeed: {
-                source: document.getElementById('hueShiftSpeedAudioSource'),
-                strength: document.getElementById('hueShiftSpeedAudioStrength')
-            },
-            psychedelicEffect: {
-                source: document.getElementById('psychedelicEffectAudioSource'),
-                strength: document.getElementById('psychedelicEffectAudioStrength')
-            },
-            colorVariety: {
-                source: document.getElementById('colorVarietyAudioSource'),
-                strength: document.getElementById('colorVarietyAudioStrength')
-            },
-            rippleSpeed: {
-                source: document.getElementById('rippleSpeedAudioSource'),
-                strength: document.getElementById('rippleSpeedAudioStrength')
-            },
-            rippleSize: {
-                source: document.getElementById('rippleSizeAudioSource'),
-                strength: document.getElementById('rippleSizeAudioStrength')
-            }
-        };
+    savePresetButton.addEventListener('click', savePreset);
 
-        function hexToRGB(hex) {
-            const r = parseInt(hex.slice(1, 3), 16) / 255;
-            const g = parseInt(hex.slice(3, 5), 16) / 255;
-            const b = parseInt(hex.slice(5, 7), 16) / 255;
-            return [r, g, b];
-        }
-
-        function getAudioValue(source) {
-            if (!dataArray) return 0;
-            switch(source) {
-                case 'bass':
-                    return dataArray.slice(0, 21).reduce((a, b) => a + b, 0) / (21 * 255);
-                case 'mid':
-                    return dataArray.slice(21, 42).reduce((a, b) => a + b, 0) / (21 * 255);
-                case 'treble':
-                    return dataArray.slice(42).reduce((a, b) => a + b, 0) / (22 * 255);
-                case 'volume':
-                    return dataArray.reduce((a, b) => a + b, 0) / (64 * 255);
-                default:
-                    return 0;
-            }
-        }
-
-        function updateUniforms() {
+    function savePreset() {
+        const name = presetNameInput.value.trim();
+        if (name) {
+            const preset = {};
             for (const [key, control] of Object.entries(controls)) {
-                let value = parseFloat(control.value);
-                if (audioMappings[key]) {
-                    const audioSource = audioMappings[key].source.value;
-                    const audioStrength = parseFloat(audioMappings[key].strength.value);
-                    if (audioSource !== 'none') {
-                        const audioValue = getAudioValue(audioSource);
-                        value += audioValue * audioStrength * (control.max - control.min);
-                        value = Math.max(control.min, Math.min(control.max, value));
-                    }
+                preset[key] = control.value;
+            }
+            for (const [key, mapping] of Object.entries(audioMappings)) {
+                preset[key + 'AudioSource'] = mapping.source.value;
+                preset[key + 'AudioStrength'] = mapping.strength.value;
+            }
+            presets.get(name).put(preset);
+            presetNameInput.value = '';
+            alert('Preset saved!');
+            loadPresets();
+        } else {
+            alert('Please enter a name for the preset.');
+        }
+    }
+
+    function loadPresets() {
+        presetList.innerHTML = '';
+        presets.map().once((preset, name) => {
+            if (preset) {
+                const li = document.createElement('li');
+                li.textContent = name;
+                const loadButton = document.createElement('button');
+                loadButton.textContent = 'Load';
+                loadButton.addEventListener('click', () => loadPreset(preset));
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deletePreset(name));
+                li.appendChild(loadButton);
+                li.appendChild(deleteButton);
+                presetList.appendChild(li);
+            }
+        });
+    }
+
+    function loadPreset(preset) {
+        for (const [key, value] of Object.entries(preset)) {
+            if (controls[key]) {
+                controls[key].value = value;
+            } else if (key.endsWith('AudioSource')) {
+                const baseKey = key.replace('AudioSource', '');
+                if (audioMappings[baseKey]) {
+                    audioMappings[baseKey].source.value = value;
                 }
-                if (key.startsWith('baseColor')) {
-                    gl.uniform3fv(uniforms[key], hexToRGB(control.value));
-                } else {
-                    gl.uniform1f(uniforms[key], value);
+            } else if (key.endsWith('AudioStrength')) {
+                const baseKey = key.replace('AudioStrength', '');
+                if (audioMappings[baseKey]) {
+                    audioMappings[baseKey].strength.value = value;
                 }
             }
         }
+        updateUniforms();
+    }
 
-        Object.values(controls).forEach(control => {
-            control.addEventListener('input', updateUniforms);
-        });
+    function deletePreset(name) {
+        if (confirm(`Are you sure you want to delete the preset "${name}"?`)) {
+            presets.get(name).put(null);
+            loadPresets();
+        }
+    }
 
-        Object.values(audioMappings).forEach(mapping => {
-            mapping.source.addEventListener('change', updateUniforms);
-            mapping.strength.addEventListener('input', updateUniforms);
-        });
+    loadPresets();
 
-        // Keyboard control
-        let keyboardControlEnabled = false;
-        const toggleKeyboardControlButton = document.getElementById('toggleKeyboardControl');
-        toggleKeyboardControlButton.addEventListener('click', () => {
-            keyboardControlEnabled = !keyboardControlEnabled;
-            toggleKeyboardControlButton.textContent = keyboardControlEnabled ? 'Disable Keyboard Control' : 'Enable Keyboard Control';
-        });
+    function render(time) {
+        time *= 0.001;  // convert to seconds
 
-        let keyboardX = 0, keyboardY = 0;
-        const keyboardSpeed = 5;
+        gl.uniform1f(uniforms.time, time);
+        gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+        
+        if (keyboardControlEnabled) {
+            gl.uniform2f(uniforms.mouse, keyboardX + canvas.width / 2, canvas.height - (keyboardY + canvas.height / 2));
+        } else {
+            gl.uniform2f(uniforms.mouse, mouseX, mouseY);
+        }
+        
+        gl.uniform2fv(uniforms.clicks, clicks.flat());
+        gl.uniform1fv(uniforms.clickTimes, clickTimes);
+        gl.uniform1i(uniforms.clickCount, clicks.length);
 
-        document.addEventListener('keydown', (e) => {
-            if (!keyboardControlEnabled) return;
-            switch (e.key) {
-                case 'ArrowUp':
-                    keyboardY += keyboardSpeed;
-                    break;
-                case 'ArrowDown':
-                    keyboardY -= keyboardSpeed;
-                    break;
-                case 'ArrowLeft':
-                    keyboardX -= keyboardSpeed;
-                    break;
-                case 'ArrowRight':
-                    keyboardX += keyboardSpeed;
-                    break;
-                case ' ':
-                    clicks.push([keyboardX + canvas.width / 2, canvas.height - (keyboardY + canvas.height / 2)]);
-                    clickTimes.push(performance.now() * 0.001);
-                    if (clicks.length > 10) {
-                        clicks.shift();
-                        clickTimes.shift();
-                    }
-                    break;
-            }
-        });
-
-        function render(time) {
-            time *= 0.001;  // convert to seconds
-
-            gl.uniform1f(uniforms.time, time);
-            gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
-            
-            if (keyboardControlEnabled) {
-                gl.uniform2f(uniforms.mouse, keyboardX + canvas.width / 2, canvas.height - (keyboardY + canvas.height / 2));
-            } else {
-                gl.uniform2f(uniforms.mouse, mouseX, mouseY);
-            }
-            
-            gl.uniform2fv(uniforms.clicks, clicks.flat());
-            gl.uniform1fv(uniforms.clickTimes, clickTimes);
-            gl.uniform1i(uniforms.clickCount, clicks.length);
-
-            if (analyser && (isPlaying || currentAudioSource)) {
-                analyser.getByteFrequencyData(dataArray);
-                const normalizedData = Array.from(dataArray).map(v => v / 255);
-                gl.uniform1fv(uniforms.audioData, normalizedData);
-            } else {
-                gl.uniform1fv(uniforms.audioData, new Float32Array(64));
-            }
-
-            updateUniforms();
-
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-            requestAnimationFrame(render);
+        if (analyser && (isPlaying || currentAudioSource)) {
+            analyser.getByteFrequencyData(dataArray);
+            const normalizedData = Array.from(dataArray).map(v => v / 255);
+            gl.uniform1fv(uniforms.audioData, normalizedData);
+        } else {
+            gl.uniform1fv(uniforms.audioData, new Float32Array(64));
         }
 
         updateUniforms();
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
         requestAnimationFrame(render);
-    </script>
-</body>
-</html>
+    }
+
+    updateUniforms();
+    requestAnimationFrame(render);
+
+    // Fullscreen functionality
+    const fullscreenButton = document.getElementById('fullscreenButton');
+    fullscreenButton.addEventListener('click', toggleFullscreen);
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                alert(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        resizeCanvas();
+    });
+</script>
+</body></html>
