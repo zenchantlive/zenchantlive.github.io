@@ -1,4 +1,4 @@
-<html><head><base href="https://ripples.gl" /><title>ripples.gl - Audio-Reactive Interactive GLSL Shader with Enhanced Sound-Visual Mapping</title><style>
+<html><head><base href="https://zenchant.ripple" /><title>zenchant.ripple - Audio-Reactive Interactive GLSL Shader with Enhanced Sound-Visual Mapping</title><style>
     body, html {
         margin: 0;
         padding: 0;
@@ -200,29 +200,103 @@
     #fullscreenButton:hover {
         background: rgba(0, 0, 0, 0.8);
     }
+    .instructions {
+        font-size: 0.9em;
+        line-height: 1.4;
+        color: #ddd;
+    }
+    .accordion {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        cursor: pointer;
+        padding: 18px;
+        width: 100%;
+        text-align: left;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+        margin-bottom: 10px;
+    }
+    .accordion:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    .panel {
+        padding: 0 18px;
+        background-color: rgba(0, 0, 0, 0.1);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+    }
+    .accordion:after {
+        content: '\02795';
+        font-size: 13px;
+        color: #fff;
+        float: right;
+        margin-left: 5px;
+    }
+    .accordion.active:after {
+        content: "\2796";
+    }
+    .features {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .features h3 {
+        margin-top: 0;
+        color: #ffcc00;
+    }
+    .features ul {
+        padding-left: 20px;
+    }
 </style></head><body>
 <canvas id="canvas"></canvas>
 <div id="hamburger">☰</div>
 <div id="menu">
-    <div class="control-group">
-        <h3>Presets</h3>
+    <button class="accordion">Instructions & Features</button>
+    <div class="panel">
+        <div class="instructions">
+            <p>Welcome to zenchant.ripple! Here's how to use this audio-reactive visual experience:</p>
+            <ul>
+                <li>Click and drag on the canvas to create ripples</li>
+                <li>Use the audio source options to react to music or microphone input</li>
+                <li>Adjust the visual controls to customize the appearance</li>
+                <li>Save and load presets to quickly switch between your favorite settings</li>
+                <li>Enable keyboard control for precise movements</li>
+                <li>Go fullscreen for an immersive experience</li>
+            </ul>
+            <p>Experiment with different combinations to create your unique visual journey!</p>
+        </div>
+        <div class="features">
+            <h3>Features</h3>
+            <ul>
+                <li>Real-time audio reactivity with customizable mappings</li>
+                <li>Interactive ripple effect triggered by mouse clicks or keyboard input</li>
+                <li>Dynamic color palette with adjustable base colors and color variety</li>
+                <li>Psychedelic effects with controllable intensity</li>
+                <li>Hue shifting and color cycling for evolving visuals</li>
+                <li>Multiple audio input options: microphone, browser audio, or file upload</li>
+                <li>Preset system for saving and loading your favorite configurations</li>
+                <li>Fullscreen mode for immersive experiences</li>
+                <li>Keyboard controls for precise interaction</li>
+                <li>Responsive design that adapts to different screen sizes</li>
+                <li>WebGL-powered for smooth, high-performance graphics</li>
+                <li>Intuitive UI with expandable control panels</li>
+            </ul>
+        </div>
+    </div>
+
+    <button class="accordion">Presets</button>
+    <div class="panel">
         <div class="preset-controls">
             <input type="text" id="presetName" placeholder="Preset name">
             <button id="savePreset">Save Preset</button>
         </div>
         <ul id="presetList"></ul>
     </div>
-    <div class="control-group keyboard-controls">
-        <h3>Keyboard Controls</h3>
-        <div class="control">
-            <button id="toggleKeyboardControl">Enable Keyboard Control</button>
-        </div>
-        <div class="keyboard-info">
-            Use arrow keys to move, spacebar to click
-        </div>
-    </div>
-    <div class="control-group">
-        <h3>Audio Source</h3>
+
+    <button class="accordion">Audio Source</button>
+    <div class="panel">
         <div class="control">
             <button id="micAudio">Use Microphone</button>
         </div>
@@ -233,19 +307,20 @@
             <label for="audioFile" class="file-upload">Choose Audio File</label>
             <input type="file" id="audioFile" accept="audio/*">
         </div>
-    </div>
-    <div class="control-group" id="musicControls" style="display:none;">
-        <h3>Music Controls</h3>
-        <div class="control">
-            <button id="playPauseAudio">Play/Pause</button>
-            <button id="stopAudio">Stop</button>
-            <button id="restartAudio">Restart</button>
-            <button id="rewindAudio">-10s</button>
-            <button id="forwardAudio">+10s</button>
+        <div id="musicControls" style="display:none;">
+            <h3>Music Controls</h3>
+            <div class="control">
+                <button id="playPauseAudio">Play/Pause</button>
+                <button id="stopAudio">Stop</button>
+                <button id="restartAudio">Restart</button>
+                <button id="rewindAudio">-10s</button>
+                <button id="forwardAudio">+10s</button>
+            </div>
         </div>
     </div>
-    <div class="control-group">
-        <h3>Visual Controls</h3>
+
+    <button class="accordion">Visual Controls</button>
+    <div class="panel">
         <div class="control">
             <label for="trippiness">Trippiness</label>
             <input type="range" id="trippiness" min="0" max="1" step="0.01" value="0.5">
@@ -322,6 +397,7 @@
             <div class="audio-mapping">
                 <select id="rippleSpeedAudioSource">
                     <option value="none">No Audio Mapping</option>
+""
                     <option value="bass">Bass</option>
                     <option value="mid">Mid</option>
                     <option value="treble">Treble</option>
@@ -357,7 +433,7 @@
             <input type="range" id="midReactivity" min="0" max="1" step="0.1" value="0.5">
         </div>
         <div class="control">
-            <label for="trebleReactivity">Treble Reactivity</label>
+            <label for="trebleReact">Treble Reactivity</label>
             <input type="range" id="trebleReactivity" min="0" max="1" step="0.1" value="0.5">
         </div>
         <div class="control">
@@ -375,6 +451,16 @@
         <div class="control">
             <label for="baseColor3">Base Color 3</label>
             <input type="color" id="baseColor3" value="#42f554">
+        </div>
+    </div>
+
+    <button class="accordion">Keyboard Controls</button>
+    <div class="panel">
+        <div class="control">
+            <button id="toggleKeyboardControl">Enable Keyboard Control</button>
+        </div>
+        <div class="keyboard-info">
+            Use arrow keys to move, spacebar to click
         </div>
     </div>
 </div>
@@ -901,7 +987,7 @@
 
     // GUN setup
     const gun = Gun();
-    const presets = gun.get('ripples-gl-presets');
+    const presets = gun.get('zenchant-ripple-presets');
 
     const savePresetButton = document.getElementById('savePreset');
     const presetNameInput = document.getElementById('presetName');
@@ -980,7 +1066,7 @@
         time *= 0.001;  // convert to seconds
 
         gl.uniform1f(uniforms.time, time);
-        gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+        gl.uniform2f(uniforms.resolution,canvas.width, canvas.height);
         
         if (keyboardControlEnabled) {
             gl.uniform2f(uniforms.mouse, keyboardX + canvas.width / 2, canvas.height - (keyboardY + canvas.height / 2));
@@ -1029,5 +1115,20 @@
     document.addEventListener('fullscreenchange', () => {
         resizeCanvas();
     });
+
+    // Accordion functionality
+    const accordions = document.getElementsByClassName("accordion");
+
+    for (let i = 0; i < accordions.length; i++) {
+        accordions[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            const panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
 </script>
 </body></html>
