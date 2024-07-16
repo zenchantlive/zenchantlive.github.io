@@ -1,4 +1,5 @@
 ☰Instructions & Features
+
 Welcome to Ripple! Here's how to use this audio-reactive visual experience:
 **Instructions**
 Click and drag on the canvas to create ripples
