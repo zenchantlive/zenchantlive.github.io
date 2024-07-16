@@ -1,7 +1,9 @@
 ☰Instructions & Features
 
 Welcome to Ripple! Here's how to use this audio-reactive visual experience:
+
 **Instructions**
+
 Click and drag on the canvas to create ripples
 Use the audio source options to react to music or microphone input
 Adjust the visual controls to customize the appearance
@@ -11,6 +13,7 @@ Go fullscreen for an immersive experience
 Experiment with different combinations to create your unique visual journey!
 
 **Features**
+
 Real-time audio reactivity with customizable mappings
 Interactive ripple effect triggered by mouse clicks or keyboard input
 Dynamic color palette with adjustable base colors and color variety
